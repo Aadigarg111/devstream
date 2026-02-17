@@ -1,0 +1,40 @@
+{
+  "name": "devstream",
+  "version": "0.1.0",
+  "private": true,
+  "description": "All-in-one developer command center - GitHub stats, coding analytics, AI tools, and more",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8",
+    "eslint-config-next": "^14.2.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5"
+  },
+  "keywords": [
+    "developer-tools",
+    "dashboard",
+    "github-stats",
+    "coding-analytics",
+    "productivity"
+  ],
+  "author": "Aadi Garg",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Aadigarg111/devstream.git"
+  }
+}
