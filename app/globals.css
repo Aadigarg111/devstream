@@ -80,15 +80,38 @@ body {
     0 30px 60px rgba(0, 0, 0, 0.28);
 }
 
+.apple-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.apple-eyebrow {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: rgba(255, 255, 255, 0.54);
+}
+
+.apple-gradient-text {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.4));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .apple-btn-primary,
 .apple-btn-secondary {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   border-radius: 999px;
-  padding: 0.7rem 1.25rem;
+  padding: 0.72rem 1.25rem;
   font-size: 0.9rem;
   font-weight: 500;
+  min-height: 44px;
   transition: all 0.25s ease;
 }
 
@@ -114,15 +137,26 @@ body {
   background: rgba(255, 255, 255, 0.1);
 }
 
-
 @keyframes floatSlow {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
 }
 
 @keyframes pulseGlow {
-  0%, 100% { opacity: 0.45; }
-  50% { opacity: 0.9; }
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+
+  50% {
+    opacity: 0.9;
+  }
 }
 
 .animate-float-slow {
@@ -131,6 +165,23 @@ body {
 
 .animate-pulse-glow {
   animation: pulseGlow 4.5s ease-in-out infinite;
+}
+
+@media (max-width: 640px) {
+  body {
+    letter-spacing: -0.005em;
+  }
+
+  .glass-panel {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      0 16px 30px rgba(0, 0, 0, 0.24);
+  }
+
+  .apple-eyebrow {
+    font-size: 0.64rem;
+    letter-spacing: 0.18em;
+  }
 }
 
 @layer utilities {
