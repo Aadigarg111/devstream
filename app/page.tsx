@@ -17,16 +17,6 @@ export default function Home() {
           <p className="text-lg">
             🚀 All-in-one dashboard for developers
           </p>
-          <div className="flex gap-8 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              Day 2 - GitHub OAuth
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-gray-700 rounded-full"></span>
-              98 Days of Commits Ahead
-            </div>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
@@ -59,10 +49,6 @@ export default function Home() {
             </svg>
             Get Started with GitHub
           </Link>
-        </div>
-
-        <div className="pt-4 text-gray-600 text-sm">
-          <p>Building daily — 100-day commitment challenge 🔥</p>
         </div>
       </div>
     </div>
