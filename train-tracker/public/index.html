@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RailView - Interactive Route</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Outfit', sans-serif; height: 100vh; overflow: hidden; }
+        
+        #map { position: absolute; inset: 0; z-index: 1; }
+        
+        .sidebar {
+            position: absolute; top: 20px; left: 20px; bottom: 20px; width: 380px;
+            background: rgba(255,255,255,0.95); border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 1000;
+            display: flex; flex-direction: column; padding: 20px;
+        }
+        
+        h1 { font-size: 1.3rem; margin-bottom: 15px; color: #1e293b; }
+        
+        .search-box { display: flex; gap: 10px; margin-bottom: 15px; }
+        .search-input {
+            flex: 1; padding: 12px 15px; border: 2px solid #e2e8f0;
+            border-radius: 10px; font-size: 1rem; outline: none; transition: border 0.2s;
+        }
+        .search-input:focus { border-color: #3b82f6; }
+        .search-btn {
+            padding: 12px 20px; background: #3b82f6; color: white;
+            border: none; border-radius: 10px; cursor: pointer; font-weight: 600;
+        }
+        .search-btn:hover { background: #2563eb; }
+        
+        .train-info {
+            padding: 12px; background: #f1f5f9; border-radius: 10px;
+            margin-bottom: 15px; display: none;
+        }
+        .train-name { font-weight: 700; color: #1e293b; margin-bottom: 5px; }
+        .train-meta { font-size: 0.85rem; color: #64748b; }
+        
+        .controls {
+            display: none; gap: 10px; margin-bottom: 15px; padding: 12px;
+            background: #eff6ff; border-radius: 10px;
+        }
+        .sim-btn {
+            flex: 1; padding: 10px; background: #10b981; color: white;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .sim-btn.stop { background: #ef4444; }
+        
+        .route-list { flex: 1; overflow-y: auto; }
+        .route-item {
+            padding: 12px; border-bottom: 1px solid #f1f5f9; cursor: pointer;
+            display: flex; gap: 12px; align-items: center; transition: background 0.2s;
+        }
+        .route-item:hover { background: #f8fafc; }
+        .route-time { font-weight: 600; color: #3b82f6; min-width: 50px; }
+        .route-name { font-weight: 600; color: #1e293b; }
+        .route-code { font-size: 0.8rem; color: #64748b; }
+        
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; top: auto; bottom: 0; height: 60vh; border-radius: 20px 20px 0 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div class="sidebar">
+        <h1>🚂 RailView</h1>
+        
+        <div class="search-box">
+            <input type="text" class="search-input" id="trainNo" placeholder="Enter train number..." value="12301">
+            <button class="search-btn" onclick="loadRoute()"><i class="ri-search-line"></i></button>
+        </div>
+        
+        <div class="train-info" id="trainInfo">
+            <div class="train-name" id="trainName"></div>
+            <div class="train-meta" id="trainMeta"></div>
+        </div>
+        
+        <div class="controls" id="controls">
+            <button class="sim-btn" id="playBtn" onclick="startSimulation()">
+                <i class="ri-play-fill"></i> Simulate Journey
+            </button>
+            <button class="sim-btn stop" id="stopBtn" onclick="stopSimulation()" style="display:none;">
+                <i class="ri-stop-fill"></i> Stop
+            </button>
+        </div>
+        
+        <div class="route-list" id="routeList"></div>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map', { zoomControl: false }).setView([20.5937, 78.9629], 5);
+        L.control.zoom({ position: 'topright' }).addTo(map);
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19
+        }).addTo(map);
+        
+        let routeLayer = L.layerGroup().addTo(map);
+        let trainMarker = null;
+        let simulationInterval = null;
+        let currentRoute = [];
+        
+        async function loadRoute() {
+            const trainNo = document.getElementById('trainNo').value.trim();
+            if (!trainNo) return;
+            
+            try {
+                const res = await fetch(`/api/train/${trainNo}`);
+                if (!res.ok) throw new Error("Not found");
+                const data = await res.json();
+                
+                currentRoute = data.route;
+                
+                // Update UI
+                document.getElementById('trainInfo').style.display = 'block';
+                document.getElementById('trainName').textContent = data.name;
+                document.getElementById('trainMeta').textContent = `#${data.trainNo} • ${data.route.length} stops • Source: ${data.source}`;
+                document.getElementById('controls').style.display = 'flex';
+                
+                // Clear map
+                routeLayer.clearLayers();
+                if (trainMarker) map.removeLayer(trainMarker);
+                
+                // Render route
+                const list = document.getElementById('routeList');
+                list.innerHTML = '';
+                const coords = [];
+                
+                data.route.forEach((stn, i) => {
+                    const pos = [stn.lat, stn.lng];
+                    coords.push(pos);
+                    
+                    const isStart = i === 0;
+                    const isEnd = i === data.route.length - 1;
+                    
+                    // Show every station as a small marker
+                    const marker = L.circleMarker(pos, {
+                        radius: isStart || isEnd ? 7 : 4,
+                        color: isStart ? '#10b981' : (isEnd ? '#ef4444' : '#3b82f6'),
+                        fillColor: '#fff',
+                        fillOpacity: 1,
+                        weight: 2
+                    }).addTo(routeLayer);
+                    
+                    marker.bindPopup(`<b>${stn.name}</b><br>${stn.code} • ${stn.time}`);
+                    
+                    // Add to list
+                    const item = document.createElement('div');
+                    item.className = 'route-item';
+                    item.innerHTML = `
+                        <div class="route-time">${stn.time}</div>
+                        <div>
+                            <div class="route-name">${stn.name}</div>
+                            <div class="route-code">${stn.code}</div>
+                        </div>
+                    `;
+                    item.onclick = () => {
+                        map.flyTo(pos, 12);
+                        marker.openPopup();
+                    };
+                    list.appendChild(item);
+                });
+                
+                // Draw single solid line
+                if (coords.length > 0) {
+                    const line = L.polyline(coords, {
+                        color: '#3b82f6',
+                        weight: 4,
+                        opacity: 0.7,
+                        smoothFactor: 1
+                    }).addTo(routeLayer);
+                    map.fitBounds(line.getBounds(), { padding: [50, 50] });
+                }
+                
+            } catch (err) {
+                alert("Train not found. Try another number.");
+            }
+        }
+        
+        function startSimulation() {
+            if (currentRoute.length === 0) return;
+            
+            stopSimulation();
+            document.getElementById('playBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'flex';
+            
+            // Create train icon
+            const trainIcon = L.divIcon({
+                html: '<i class="ri-train-fill" style="font-size:24px; color:#3b82f6;"></i>',
+                iconSize: [30, 30],
+                className: 'train-icon'
+            });
+            
+            trainMarker = L.marker([currentRoute[0].lat, currentRoute[0].lng], { icon: trainIcon }).addTo(map);
+            
+            let legIndex = 0;
+            let progress = 0;
+            const speed = 0.02;
+            
+            simulationInterval = setInterval(() => {
+                if (legIndex >= currentRoute.length - 1) {
+                    stopSimulation();
+                    alert("Journey complete!");
+                    return;
+                }
+                
+                const start = currentRoute[legIndex];
+                const end = currentRoute[legIndex + 1];
+                
+                const newLat = start.lat + (end.lat - start.lat) * progress;
+                const newLng = start.lng + (end.lng - start.lng) * progress;
+                
+                trainMarker.setLatLng([newLat, newLng]);
+                map.panTo([newLat, newLng]);
+                
+                progress += speed;
+                if (progress >= 1) {
+                    progress = 0;
+                    legIndex++;
+                }
+            }, 50);
+        }
+        
+        function stopSimulation() {
+            if (simulationInterval) clearInterval(simulationInterval);
+            if (trainMarker) map.removeLayer(trainMarker);
+            document.getElementById('playBtn').style.display = 'flex';
+            document.getElementById('stopBtn').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
