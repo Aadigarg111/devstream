@@ -4,14 +4,15 @@ import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { href: "/dashboard", label: "Dashboard", icon: "📊" },
-  { href: "/stats", label: "Stats", icon: "📈" },
-  { href: "/repos", label: "Repos", icon: "📂" },
-  { href: "/activity", label: "Activity", icon: "⚡" },
-  { href: "/ai", label: "AI Tools", icon: "🤖" },
-  { href: "/search", label: "Search", icon: "🔍" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/stats", label: "Stats" },
+  { href: "/repos", label: "Repos" },
+  { href: "/activity", label: "Activity" },
+  { href: "/ai", label: "AI" },
+  { href: "/search", label: "Search" },
 ];
 
 export default function Navbar() {
@@ -21,17 +22,26 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 w-full z-50 border-b border-gray-800/50 bg-black/80 backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="text-xl font-bold tracking-tight">DevStream</Link>
+    <nav className="fixed top-0 z-50 w-full border-b border-white/10 bg-[#09090b]/70 backdrop-blur-2xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+        <div className="flex items-center gap-5">
+          <Link href="/" className="text-lg font-semibold tracking-[-0.02em] text-white">
+            DevStream
+          </Link>
 
           {status === "authenticated" && (
-            <div className="hidden md:flex items-center gap-1">
-              {NAV_LINKS.map(link => (
-                <Link key={link.href} href={link.href}
-                  className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${pathname === link.href ? "bg-gray-800 text-white" : "text-gray-400 hover:text-white hover:bg-gray-800/50"}`}>
-                  {link.icon} {link.label}
+            <div className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] p-1 md:flex">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`rounded-full px-3 py-1.5 text-sm transition ${
+                    pathname === link.href
+                      ? "bg-white/15 text-white"
+                      : "text-white/55 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  {link.label}
                 </Link>
               ))}
             </div>
@@ -41,45 +51,81 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {status === "authenticated" && profile ? (
             <>
-              <Link href="/settings" className={`hidden sm:block text-sm px-3 py-1.5 rounded-lg transition-colors ${pathname === "/settings" ? "bg-gray-800 text-white" : "text-gray-400 hover:text-white"}`}>
-                ⚙️
+              <Link
+                href="/settings"
+                className={`hidden rounded-full border px-3 py-1.5 text-sm transition sm:block ${
+                  pathname === "/settings"
+                    ? "border-white/20 bg-white/15 text-white"
+                    : "border-white/10 text-white/65 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                Settings
               </Link>
-              <div className="hidden sm:flex items-center gap-2">
-                <img src={profile.avatar_url} alt={profile.login} className="w-7 h-7 rounded-full ring-2 ring-gray-800" />
-                <span className="text-sm text-gray-300">{profile.login}</span>
+              <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-2 py-1 sm:flex">
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.login}
+                  className="h-7 w-7 rounded-full border border-white/15"
+                />
+                <span className="pr-1 text-sm text-white/80">{profile.login}</span>
               </div>
-              <button onClick={() => signOut({ callbackUrl: "/" })} className="text-sm text-gray-500 hover:text-white transition-colors">
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="hidden rounded-full border border-white/10 px-3 py-1.5 text-sm text-white/65 transition hover:bg-white/10 hover:text-white sm:block"
+              >
                 Sign out
               </button>
-              {/* Mobile menu button */}
-              <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-gray-400 hover:text-white p-1">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {mobileOpen ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
-                </svg>
+              <button
+                onClick={() => setMobileOpen((prev) => !prev)}
+                className="rounded-full border border-white/10 p-2 text-white/70 transition hover:bg-white/10 hover:text-white md:hidden"
+                aria-label="Toggle menu"
+              >
+                {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
             </>
           ) : (
-            <Link href="/login" className="text-sm px-4 py-2 rounded-lg bg-white text-black font-medium hover:bg-gray-200 transition-colors">
+            <Link href="/login" className="apple-btn-primary !py-1.5 !text-sm">
               Sign in
             </Link>
           )}
         </div>
       </div>
 
-      {/* Mobile menu */}
       {mobileOpen && status === "authenticated" && (
-        <div className="md:hidden border-t border-gray-800 bg-black/95 backdrop-blur-xl px-4 py-3 space-y-1">
-          {NAV_LINKS.map(link => (
-            <Link key={link.href} href={link.href} onClick={() => setMobileOpen(false)}
-              className={`block px-3 py-2.5 rounded-lg text-sm ${pathname === link.href ? "bg-gray-800 text-white" : "text-gray-400"}`}>
-              {link.icon} {link.label}
+        <div className="border-t border-white/10 bg-black/85 px-4 py-3 backdrop-blur-2xl md:hidden">
+          <div className="space-y-1">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className={`block rounded-xl px-3 py-2.5 text-sm transition ${
+                  pathname === link.href
+                    ? "bg-white/15 text-white"
+                    : "text-white/65 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link
+              href="/settings"
+              onClick={() => setMobileOpen(false)}
+              className={`block rounded-xl px-3 py-2.5 text-sm transition ${
+                pathname === "/settings"
+                  ? "bg-white/15 text-white"
+                  : "text-white/65 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              Settings
             </Link>
-          ))}
-          <Link href="/settings" onClick={() => setMobileOpen(false)}
-            className={`block px-3 py-2.5 rounded-lg text-sm ${pathname === "/settings" ? "bg-gray-800 text-white" : "text-gray-400"}`}>
-            ⚙️ Settings
-          </Link>
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="mt-2 w-full rounded-xl border border-white/10 px-3 py-2.5 text-left text-sm text-white/65 transition hover:bg-white/10 hover:text-white"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       )}
     </nav>

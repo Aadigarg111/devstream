@@ -2,9 +2,18 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { LayoutDashboard, History, Star, Folder, Flame, TrendingUp, Zap } from "lucide-react";
+import {
+  Activity,
+  ArrowUpRight,
+  Flame,
+  FolderGit2,
+  GitCommitHorizontal,
+  Sparkles,
+  Star,
+  Users,
+} from "lucide-react";
 
 interface GitHubRepo {
   id: number;
@@ -16,7 +25,6 @@ interface GitHubRepo {
   forks_count: number;
   language: string | null;
   updated_at: string;
-  visibility: string;
 }
 
 interface GitHubEvent {
@@ -24,22 +32,11 @@ interface GitHubEvent {
   type: string;
   repo: { name: string };
   created_at: string;
-  payload: any;
 }
 
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
-
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const } }
+const fadeInUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0 },
 };
 
 export default function DashboardPage() {
@@ -57,7 +54,9 @@ export default function DashboardPage() {
   }, [status, router]);
 
   useEffect(() => {
-    if (accessToken && profile) fetchGitHubData();
+    if (accessToken && profile) {
+      fetchGitHubData();
+    }
   }, [accessToken, profile]);
 
   async function fetchGitHubData() {
@@ -68,27 +67,41 @@ export default function DashboardPage() {
       };
 
       const [reposRes, eventsRes] = await Promise.all([
-        fetch(`https://api.github.com/user/repos?sort=updated&per_page=6&type=owner`, { headers }),
+        fetch("https://api.github.com/user/repos?sort=updated&per_page=8&type=owner", { headers }),
         fetch(`https://api.github.com/users/${profile.login}/events?per_page=20`, { headers }),
       ]);
 
       if (reposRes.ok) setRepos(await reposRes.json());
       if (eventsRes.ok) setEvents(await eventsRes.json());
-      
-    } catch (err) {
-      console.error("Failed to fetch GitHub data:", err);
+    } catch (error) {
+      console.error("Failed to fetch dashboard data", error);
     } finally {
       setLoading(false);
     }
   }
 
+  const metrics = useMemo(() => {
+    const stars = repos.reduce((sum, repo) => sum + repo.stargazers_count, 0);
+    const forks = repos.reduce((sum, repo) => sum + repo.forks_count, 0);
+    const pushes = events.filter((event) => event.type === "PushEvent").length;
+
+    return [
+      { label: "Repositories", value: profile?.public_repos ?? 0, icon: FolderGit2, accent: "text-sky-200" },
+      { label: "Followers", value: profile?.followers ?? 0, icon: Users, accent: "text-violet-200" },
+      { label: "Stars", value: stars, icon: Star, accent: "text-amber-200" },
+      { label: "Push Activity", value: pushes, icon: GitCommitHorizontal, accent: "text-emerald-200" },
+      { label: "Forks", value: forks, icon: Activity, accent: "text-indigo-200" },
+      { label: "Streak Mode", value: "ON", icon: Flame, accent: "text-orange-200" },
+    ];
+  }, [profile, repos, events]);
+
   if (status === "loading" || (status === "authenticated" && loading)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <motion.div 
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="w-12 h-12 border-t-2 border-white rounded-full animate-spin"
+      <div className="flex min-h-screen items-center justify-center bg-[#050507] pt-20">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1.4, ease: "linear" }}
+          className="h-12 w-12 rounded-full border-2 border-white/20 border-t-white"
         />
       </div>
     );
@@ -97,113 +110,115 @@ export default function DashboardPage() {
   if (!profile) return null;
 
   return (
-    <main className="min-h-screen bg-black bg-grid-white/[0.02] pt-24 pb-20 px-6 sm:px-10">
-      <div className="max-w-[1400px] mx-auto">
-        
-        {/* Header Section */}
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12"
-        >
-          <div className="flex items-center gap-6">
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-              <img src={profile.avatar_url} className="relative w-24 h-24 rounded-full border border-white/10" alt="avatar" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold tracking-tight text-white mb-1">{profile.name || profile.login}</h1>
-              <p className="text-white/50 text-lg">@{profile.login}</p>
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <div className="glass-card px-6 py-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
-              <p className="text-xs text-white/40 uppercase tracking-widest mb-1">Status</p>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="font-medium text-white">Active Mission</span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+    <main className="relative min-h-screen overflow-hidden bg-[#050507] px-4 pb-16 pt-24 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-0 bg-apple-noise opacity-40" />
+      <div className="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full bg-violet-400/20 blur-[130px] animate-float-slow" />
+      <div className="pointer-events-none absolute bottom-0 left-0 h-96 w-96 rounded-full bg-blue-400/15 blur-[130px] animate-pulse-glow" />
 
-        {/* Stats Grid */}
-        <motion.div 
-          variants={container}
+      <div className="relative mx-auto max-w-7xl space-y-8">
+        <motion.section
+          variants={fadeInUp}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="glass-panel rounded-[2rem] border border-white/10 p-6 md:p-8"
         >
-          {[
-            { label: "Repos", value: profile.public_repos, icon: Folder, color: "text-blue-400" },
-            { label: "Followers", value: profile.followers, icon: TrendingUp, color: "text-purple-400" },
-            { label: "Following", value: profile.following, icon: Star, color: "text-yellow-400" },
-            { label: "Day Streak", value: 2, icon: Flame, color: "text-orange-500" }, // Hardcoded streak for polish demo
-          ].map((stat, i) => (
-            <motion.div key={i} variants={item} className="glass-card p-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-colors group">
-              <stat.icon className={`w-6 h-6 ${stat.color} mb-4 group-hover:scale-110 transition-transform`} />
-              <p className="text-3xl font-bold text-white mb-1">{stat.value}</p>
-              <p className="text-white/40 text-sm font-medium tracking-wide uppercase">{stat.label}</p>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content Area */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="lg:col-span-2 space-y-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold flex items-center gap-3 text-white">
-                <LayoutDashboard className="w-6 h-6 text-white/40" />
-                Recent Projects
-              </h2>
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-5">
+              <img src={profile.avatar_url} alt={profile.login} className="h-20 w-20 rounded-full border border-white/20" />
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-white/45">Command center</p>
+                <h1 className="mt-2 text-3xl font-semibold tracking-[-0.02em] md:text-4xl">{profile.name || profile.login}</h1>
+                <p className="text-white/60">@{profile.login}</p>
+              </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {repos.map((repo, i) => (
-                <a key={repo.id} href={repo.html_url} target="_blank" className="glass-card p-8 rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md hover:scale-[1.02] transition-all duration-300 group relative overflow-hidden block">
-                  <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <TrendingUp className="w-4 h-4 text-white/20" />
+
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-sm text-emerald-100">
+              <Sparkles className="h-4 w-4" />
+              All systems synchronized
+            </div>
+          </div>
+        </motion.section>
+
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {metrics.map((metric, index) => (
+            <motion.article
+              key={metric.label}
+              variants={fadeInUp}
+              initial="hidden"
+              animate="show"
+              transition={{ duration: 0.5, delay: 0.08 * index }}
+              whileHover={{ y: -4, scale: 1.01 }}
+              className="glass-panel rounded-3xl border border-white/10 p-5"
+            >
+              <metric.icon className={`h-5 w-5 ${metric.accent}`} />
+              <p className="mt-4 text-3xl font-semibold tracking-tight">{metric.value}</p>
+              <p className="mt-1 text-sm text-white/55">{metric.label}</p>
+            </motion.article>
+          ))}
+        </section>
+
+        <section className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+          <motion.div
+            variants={fadeInUp}
+            initial="hidden"
+            animate="show"
+            transition={{ duration: 0.65, delay: 0.2 }}
+            className="glass-panel rounded-[1.8rem] border border-white/10 p-6"
+          >
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-2xl font-medium tracking-tight">Recent repositories</h2>
+              <a href="https://github.com" target="_blank" className="apple-btn-secondary !px-3 !py-1.5 !text-xs" rel="noreferrer">
+                Open GitHub <ArrowUpRight className="h-3.5 w-3.5" />
+              </a>
+            </div>
+            <div className="space-y-3">
+              {repos.slice(0, 6).map((repo) => (
+                <motion.a
+                  key={repo.id}
+                  whileHover={{ x: 4 }}
+                  href={repo.html_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:bg-white/[0.08]"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-medium text-white">{repo.full_name}</p>
+                      <p className="mt-1 line-clamp-2 text-sm text-white/60">{repo.description || "No description available"}</p>
+                    </div>
+                    <div className="text-right text-xs text-white/45">
+                      <p>★ {repo.stargazers_count}</p>
+                      <p>⑂ {repo.forks_count}</p>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">{repo.name}</h3>
-                  <p className="text-white/50 text-sm line-clamp-2 mb-6 h-10">{repo.description || "No description provided."}</p>
-                  <div className="flex items-center gap-4 text-xs font-medium text-white/40 uppercase tracking-widest">
-                    <span className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-blue-500" />
-                      {repo.language || "Web"}
-                    </span>
-                    <span>⭐ {repo.stargazers_count}</span>
-                  </div>
-                </a>
+                </motion.a>
               ))}
             </div>
           </motion.div>
 
-          {/* Activity Sidebar */}
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 }} className="space-y-8">
-            <h2 className="text-2xl font-bold flex items-center gap-3 text-white">
-              <History className="w-6 h-6 text-white/40" />
-              Pulse
-            </h2>
-            <div className="glass-card rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-6 space-y-6">
-              {events.slice(0, 6).map((event, i) => (
-                <div key={i} className="flex gap-4 group cursor-default items-center">
-                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-colors">
-                    <Zap className="w-4 h-4 text-white/60" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-white/80 font-medium truncate">
-                      {event.type.replace("Event", "")}
-                    </p>
-                    <p className="text-xs text-white/40 truncate">{event.repo.name}</p>
-                  </div>
-                  <p className="text-[10px] text-white/20 uppercase tracking-tighter whitespace-nowrap">
-                      {new Date(event.created_at).toLocaleDateString()}
+          <motion.div
+            variants={fadeInUp}
+            initial="hidden"
+            animate="show"
+            transition={{ duration: 0.65, delay: 0.3 }}
+            className="glass-panel rounded-[1.8rem] border border-white/10 p-6"
+          >
+            <h2 className="text-2xl font-medium tracking-tight">Live activity</h2>
+            <p className="mt-1 text-sm text-white/55">Latest events from your GitHub feed.</p>
+            <div className="mt-5 space-y-3">
+              {events.slice(0, 8).map((event) => (
+                <div key={event.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                  <p className="text-sm text-white/80">{event.type.replace("Event", "")}</p>
+                  <p className="text-xs text-white/55">{event.repo.name}</p>
+                  <p className="mt-1 text-[11px] uppercase tracking-wide text-white/35">
+                    {new Date(event.created_at).toLocaleString()}
                   </p>
                 </div>
               ))}
             </div>
           </motion.div>
-        </div>
+        </section>
       </div>
     </main>
   );
