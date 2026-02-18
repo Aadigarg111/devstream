@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import AnimatedLogo from "@/components/AnimatedLogo";
 import {
   ArrowRight,
   BrainCircuit,
@@ -104,6 +105,9 @@ export default function Home() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="max-w-4xl"
         >
+          <div className="mb-6">
+            <AnimatedLogo compact markClassName="h-14 w-14" />
+          </div>
           <p className="apple-eyebrow mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5">
             <Sparkles className="h-3.5 w-3.5" />
             Apple-grade command center for builders

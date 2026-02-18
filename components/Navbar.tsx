@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import AnimatedLogo from "@/components/AnimatedLogo";
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard" },
@@ -25,8 +26,8 @@ export default function Navbar() {
     <nav className="fixed top-0 z-50 w-full border-b border-white/10 bg-[#09090b]/70 backdrop-blur-2xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-5">
-          <Link href="/" className="text-lg font-semibold tracking-[-0.02em] text-white">
-            DevStream
+          <Link href="/" className="rounded-full p-1 transition hover:bg-white/5">
+            <AnimatedLogo />
           </Link>
 
           {status === "authenticated" && (
