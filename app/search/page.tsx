@@ -1,93 +1,105 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { motion } from "framer-motion";
+import { Search, Sparkles } from "lucide-react";
 
-interface SearchResult {
-  id: number; name: string; full_name: string; description: string | null;
-  html_url: string; stargazers_count: number; forks_count: number;
-  language: string | null; owner: { login: string; avatar_url: string };
+interface RepoResult {
+  id: number;
+  full_name: string;
+  html_url: string;
+  description: string | null;
+  stargazers_count: number;
+  forks_count: number;
+  language: string | null;
+  owner: { avatar_url: string };
 }
 
 export default function SearchPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const [query, setQuery] = useState("nextjs dashboard");
+  const [results, setResults] = useState<RepoResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
 
-  const accessToken = (session as any)?.accessToken;
+  useEffect(() => {
+    if (status === "unauthenticated") router.push("/login");
+  }, [status, router]);
 
-  if (status === "unauthenticated") { router.push("/login"); return null; }
-
-  async function search() {
+  async function runSearch() {
     if (!query.trim()) return;
     setLoading(true);
-    setSearched(true);
     try {
-      const res = await fetch(`https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&per_page=20`, {
-        headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/vnd.github.v3+json" },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setResults(data.items || []);
-      }
-    } catch (err) { console.error(err); }
-    finally { setLoading(false); }
+      const res = await fetch(`https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&per_page=12`);
+      const data = await res.json();
+      setResults(data.items || []);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  const langColors: Record<string, string> = {
-    TypeScript: "#3178c6", JavaScript: "#f1e05a", Python: "#3572A5",
-    Java: "#b07219", Go: "#00ADD8", Rust: "#dea584", HTML: "#e34c26",
-    CSS: "#563d7c", Shell: "#89e051", "C++": "#f34b7d",
-  };
+  useEffect(() => {
+    runSearch();
+  }, []);
+
+  if (status === "loading") {
+    return <div className="flex min-h-screen items-center justify-center pt-16"><div className="h-10 w-10 animate-spin rounded-full border-2 border-white/20 border-t-white" /></div>;
+  }
 
   return (
-    <div className="min-h-screen pt-20 pb-12 px-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">🔍 Search</h1>
+    <main className="relative min-h-screen bg-[#050507] px-4 pb-16 pt-24 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-0 bg-apple-noise opacity-35" />
+      <div className="relative mx-auto max-w-7xl space-y-6">
+        <motion.section initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="glass-panel rounded-[2rem] border border-white/10 p-6 md:p-8">
+          <p className="text-xs uppercase tracking-[0.2em] text-white/45">Discovery engine</p>
+          <h1 className="mt-3 text-4xl font-semibold tracking-tight">Search and benchmark repos</h1>
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && runSearch()}
+                className="w-full rounded-full border border-white/10 bg-[#09090e] py-2.5 pl-10 pr-4 text-sm outline-none placeholder:text-white/35 focus:border-white/25"
+                placeholder="Search repositories"
+              />
+            </div>
+            <button onClick={runSearch} className="apple-btn-primary justify-center sm:justify-start">
+              <Sparkles className="h-4 w-4" />
+              {loading ? "Searching..." : "Search"}
+            </button>
+          </div>
+        </motion.section>
 
-        <div className="flex gap-3">
-          <input value={query} onChange={e => setQuery(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && search()}
-            placeholder="Search GitHub repositories..."
-            className="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gray-500" />
-          <button onClick={search} disabled={loading}
-            className="px-6 py-3 bg-white text-black rounded-xl font-medium text-sm hover:bg-gray-200 transition-colors disabled:opacity-50">
-            {loading ? "..." : "Search"}
-          </button>
-        </div>
-
-        <div className="space-y-3">
-          {results.map(repo => (
-            <a key={repo.id} href={repo.html_url} target="_blank" rel="noopener noreferrer"
-              className="block p-5 rounded-xl border border-gray-800 hover:border-gray-600 bg-gray-900/20 transition-all hover:bg-gray-900/40">
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {results.map((repo, idx) => (
+            <motion.a
+              key={repo.id}
+              href={repo.html_url}
+              target="_blank"
+              rel="noreferrer"
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: Math.min(0.03 * idx, 0.4) }}
+              whileHover={{ y: -4 }}
+              className="glass-panel rounded-3xl border border-white/10 p-5"
+            >
               <div className="flex items-center gap-3">
-                <img src={repo.owner.avatar_url} alt="" className="w-8 h-8 rounded-full" />
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-blue-400 truncate">{repo.full_name}</h3>
-                  {repo.description && <p className="text-sm text-gray-500 mt-1 line-clamp-2">{repo.description}</p>}
-                  <div className="flex items-center gap-4 mt-2 text-xs text-gray-600">
-                    {repo.language && (
-                      <span className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: langColors[repo.language] || "#6b7280" }} />
-                        {repo.language}
-                      </span>
-                    )}
-                    <span>⭐ {repo.stargazers_count.toLocaleString()}</span>
-                    <span>🍴 {repo.forks_count.toLocaleString()}</span>
-                  </div>
-                </div>
+                <img src={repo.owner.avatar_url} alt="owner" className="h-8 w-8 rounded-full border border-white/15" />
+                <p className="truncate font-medium text-sky-200">{repo.full_name}</p>
               </div>
-            </a>
+              <p className="mt-3 line-clamp-2 min-h-[2.5rem] text-sm text-white/60">{repo.description || "No description"}</p>
+              <div className="mt-4 flex flex-wrap gap-3 text-xs text-white/55">
+                {repo.language ? <span className="rounded-full border border-white/10 px-2 py-1">{repo.language}</span> : null}
+                <span>★ {repo.stargazers_count.toLocaleString()}</span>
+                <span>⑂ {repo.forks_count.toLocaleString()}</span>
+              </div>
+            </motion.a>
           ))}
-          {searched && results.length === 0 && !loading && (
-            <p className="text-gray-600 text-center py-8">No results found</p>
-          )}
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
