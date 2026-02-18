@@ -7,10 +7,63 @@
   --foreground: #ffffff;
 }
 
+[data-theme="light"] {
+  --background: #ffffff;
+  --foreground: #000000;
+}
+
+[data-theme="light"] body {
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
+
+[data-theme="light"] nav {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .bg-black {
+  background-color: #f5f5f7;
+}
+
+[data-theme="light"] .bg-gray-900\/30,
+[data-theme="light"] .bg-gray-900\/20 {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="light"] .border-gray-800 {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .text-white {
+  color: #1d1d1f;
+}
+
+[data-theme="light"] .text-gray-400 {
+  color: #6e6e73;
+}
+
+[data-theme="light"] .text-gray-500 {
+  color: #86868b;
+}
+
+[data-theme="light"] .text-gray-600 {
+  color: #a1a1a6;
+}
+
+[data-theme="light"] .bg-gray-800 {
+  background-color: #e5e5ea;
+}
+
+[data-theme="light"] .bg-gray-900 {
+  background-color: #f5f5f7;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }

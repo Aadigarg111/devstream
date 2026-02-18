@@ -16,44 +16,44 @@
 - [x] Deployed to Vercel
 
 ## Day 3 — Feb 19, 2026
-- [ ] GitHub API: detailed user stats page
-- [ ] Contribution graph animations
-- [ ] Language breakdown chart (pie/bar)
+- [x] GitHub API: detailed user stats page
+- [x] Contribution graph animations
+- [x] Language breakdown chart (horizontal bar)
 
 ## Day 4 — Feb 20, 2026
-- [ ] Repository analytics page
-- [ ] Commit frequency chart
-- [ ] Code frequency stats
+- [x] Repository analytics page
+- [x] Commit frequency chart
+- [x] Code frequency stats
 
 ## Day 5 — Feb 21, 2026
-- [ ] Activity timeline with filters
-- [ ] PR & issue tracking view
-- [ ] Notification center
+- [x] Activity timeline with filters
+- [x] PR & issue tracking view
+- [x] Notification center
 
 ## Day 6 — Feb 22, 2026
-- [ ] Dark/Light theme toggle
-- [ ] Settings page
-- [ ] Profile customization
+- [x] Dark/Light theme toggle
+- [x] Settings page
+- [x] Profile customization
 
 ## Day 7 — Feb 23, 2026
-- [ ] Week 1 review & UI polish
-- [ ] Bug fixes & refactoring
-- [ ] Performance optimization
+- [x] Week 1 review & UI polish
+- [x] Bug fixes & refactoring
+- [x] Performance optimization
 
 ## Day 8 — Feb 24, 2026
-- [ ] AI code snippet generator (OpenAI/Gemini)
-- [ ] Chat-style code assistant UI
-- [ ] Code syntax highlighting
+- [x] AI code snippet generator (OpenAI/Gemini)
+- [x] Chat-style code assistant UI
+- [x] Code syntax highlighting
 
 ## Day 9 — Feb 25, 2026
-- [ ] AI code explainer
-- [ ] Code review suggestions
-- [ ] Copy/save generated code
+- [x] AI code explainer
+- [x] Code review suggestions
+- [x] Copy/save generated code
 
 ## Day 10 — Feb 26, 2026
-- [ ] AI commit message generator
-- [ ] README generator from repo
-- [ ] AI-powered search
+- [x] AI commit message generator
+- [x] README generator from repo
+- [x] AI-powered search
 
 ## Day 11 — Feb 27, 2026
 - [ ] Coding analytics dashboard
