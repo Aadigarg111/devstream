@@ -39,7 +39,7 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const } }
 };
 
 export default function DashboardPage() {
@@ -181,7 +181,7 @@ export default function DashboardPage() {
           {/* Activity Sidebar */}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 }} className="space-y-8">
             <h2 className="text-2xl font-bold flex items-center gap-3 text-white">
-              <History className=\"w-6 h-6 text-white/40\" />
+              <History className="w-6 h-6 text-white/40" />
               Pulse
             </h2>
             <div className="glass-card rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-6 space-y-6">
