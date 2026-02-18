@@ -167,6 +167,88 @@ body {
   animation: pulseGlow 4.5s ease-in-out infinite;
 }
 
+@keyframes logoOrbit {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: rotate(180deg) scale(1.04);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes logoBreathe {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.28),
+      0 10px 30px rgba(44, 173, 255, 0.28);
+  }
+
+  50% {
+    transform: scale(1.07);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.38),
+      0 16px 44px rgba(113, 107, 255, 0.42);
+  }
+}
+
+.ds-logo-mark {
+  position: relative;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  overflow: hidden;
+  background: radial-gradient(circle at 30% 25%, rgba(147, 197, 253, 0.92), rgba(79, 70, 229, 0.84) 62%, rgba(12, 14, 26, 0.9));
+}
+
+.ds-logo-glow {
+  position: absolute;
+  inset: -28%;
+  background: conic-gradient(from 35deg, rgba(125, 211, 252, 0.38), rgba(167, 139, 250, 0.48), rgba(125, 211, 252, 0.35));
+  filter: blur(8px);
+}
+
+.ds-logo-ring {
+  position: absolute;
+  border-radius: 999px;
+}
+
+.ds-logo-ring-outer {
+  inset: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  animation: logoOrbit 9s linear infinite;
+}
+
+.ds-logo-ring-inner {
+  inset: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  animation: logoOrbit 6s linear infinite reverse;
+}
+
+.ds-logo-core {
+  position: relative;
+  z-index: 2;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(186, 230, 253, 0.88));
+  color: #0f172a;
+  font-size: 0.48rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  animation: logoBreathe 3.2s ease-in-out infinite;
+}
+
 @media (max-width: 640px) {
   body {
     letter-spacing: -0.005em;

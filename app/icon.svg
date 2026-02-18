@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title>DevStream favicon</title>
+  <desc>Gradient circular DS monogram with orbit rings.</desc>
+  <defs>
+    <linearGradient id="bg" x1="20" y1="20" x2="236" y2="236" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7dd3fc" />
+      <stop offset="0.55" stop-color="#6366f1" />
+      <stop offset="1" stop-color="#0f172a" />
+    </linearGradient>
+    <radialGradient id="shine" cx="0" cy="0" r="1" gradientTransform="translate(88 80) rotate(41.6) scale(145)">
+      <stop stop-color="#ffffff" stop-opacity="0.8" />
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="256" height="256" rx="64" fill="url(#bg)" />
+  <rect width="256" height="256" rx="64" fill="url(#shine)" />
+  <circle cx="128" cy="128" r="90" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="8" />
+  <circle cx="128" cy="128" r="62" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="6" />
+  <circle cx="128" cy="128" r="43" fill="rgba(255,255,255,0.92)" />
+  <text x="128" y="139" text-anchor="middle" font-family="Inter, SF Pro Display, Arial, sans-serif" font-size="34" font-weight="900" fill="#0f172a" letter-spacing="3">DS</text>
+</svg>
