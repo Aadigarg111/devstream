@@ -16,8 +16,23 @@ Your all-in-one personalized dashboard for developers.
 
 ## Getting Started
 
+1. Install dependencies
+
 ```bash
 npm install
+```
+
+2. Create environment file
+
+```bash
+cp .env.example .env.local
+```
+
+3. Add your `GEMINI_API_KEY` in `.env.local` (from Google AI Studio).
+
+4. Start the app
+
+```bash
 npm run dev
 ```
 

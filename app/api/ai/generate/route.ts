@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { generateWithGemini } from "@/lib/gemini";
 
 const DEMO_RESPONSES = [
   "```typescript\nimport { useState, useEffect } from 'react';\n\ninterface UseFetchResult<T> {\n  data: T | null;\n  loading: boolean;\n  error: Error | null;\n}\n\nexport function useFetch<T>(url: string): UseFetchResult<T> {\n  const [data, setData] = useState<T | null>(null);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState<Error | null>(null);\n\n  useEffect(() => {\n    const controller = new AbortController();\n    fetch(url, { signal: controller.signal })\n      .then(res => res.json())\n      .then(setData)\n      .catch(setError)\n      .finally(() => setLoading(false));\n    return () => controller.abort();\n  }, [url]);\n\n  return { data, loading, error };\n}\n```\n\nA custom React hook for data fetching with loading and error states.",
@@ -7,25 +8,18 @@ const DEMO_RESPONSES = [
 
 export async function POST(req: NextRequest) {
   const { prompt } = await req.json();
-  const apiKey = process.env.OPENAI_API_KEY;
 
-  if (apiKey) {
-    try {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [
-            { role: "system", content: "You are a helpful coding assistant. Generate clean, well-commented code with explanations. Use markdown code blocks with language tags." },
-            { role: "user", content: prompt },
-          ],
-          max_tokens: 1000,
-        }),
-      });
-      const data = await res.json();
-      return NextResponse.json({ response: data.choices[0].message.content });
-    } catch { /* fallback to demo */ }
+  try {
+    const response = await generateWithGemini(
+      "You are a helpful coding assistant. Generate clean, well-commented code with explanations. Use markdown code blocks with language tags.",
+      prompt,
+    );
+
+    if (response) {
+      return NextResponse.json({ response });
+    }
+  } catch {
+    // fallback to demo
   }
 
   return NextResponse.json({ response: DEMO_RESPONSES[Math.floor(Math.random() * DEMO_RESPONSES.length)] });
